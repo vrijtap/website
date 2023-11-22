@@ -23,6 +23,26 @@ type PaymentData struct {
 	ID       string `json:"id"`
 }
 
+// Function to determine the correct webhook URL based on the request scheme (HTTP or HTTPS)
+func getWebhookURL(r *http.Request, orderID string) string {
+    scheme := "https"
+    if r.TLS == nil {
+        // Request is not over HTTPS, use HTTP instead
+        scheme = "http"
+    }
+    return fmt.Sprintf("%s://%s/order/%s", scheme, r.Host, orderID)
+}
+
+// Function to determine the correct redirect URL based on the request scheme (HTTP or HTTPS)
+func getRedirectURL(r *http.Request, clientID string) string {
+    scheme := "https"
+    if r.TLS == nil {
+        // Request is not over HTTPS, use HTTP instead
+        scheme = "http"
+    }
+    return fmt.Sprintf("%s://%s/client/%s", scheme, r.Host, clientID)
+}
+
 // OrderPost handles POST requests for creating orders
 func OrderPost(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON data from the request body into paymentData struct
@@ -75,10 +95,10 @@ func OrderPost(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// Prepare data for the transaction using fakepay processor
 		transactionInput := fakepay.FakepayTransactionInput{
-			Amount:      order.TotalAmount,
-			WebhookURL:  fmt.Sprintf("https://%s/order/%s", r.Host, order.ID.Hex()),
-			WebhookKey:  os.Getenv("WEBHOOK_KEY"),
-			RedirectURL: fmt.Sprintf("https://%s/client/%s", r.Host, paymentData.ID),
+    		Amount:			order.TotalAmount,
+    		WebhookURL:		getWebhookURL(r, order.ID.Hex()),
+    		WebhookKey:		os.Getenv("WEBHOOK_KEY"),
+    		RedirectURL:	getRedirectURL(r, paymentData.ID),
 		}
 
 		// Obtain the modified redirect URL from the fakepay processor
