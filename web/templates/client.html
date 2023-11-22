@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/static/img/favicon-32x32.png" sizes="32x32">
+    <title>Top Up - Vrijtap</title>
+    <link rel="stylesheet" href="/static/css/client.css">
+</head>
+<body>
+    <!-- Title / Logo -->
+    <div class="title">
+        <div class="title-card">
+            <h1>Top Up</h1>
+            <h1 id="title-underline">-----------</h1>
+        </div>
+        <p class="introduction">Welcome to {{.Name}},<br>enjoy your stay!</p>
+    </div>
+
+    <!-- Ordering -->
+    <div class="body">
+        <div class="order-box">
+            <h2>Payment</h2>
+            
+            <!-- Order Input -->
+            <div class="form-container">
+                <input type="text" id="userInput" class="text-input" placeholder="Number of Beers">
+                <label for="userInput" class="input-label">x €{{.Price}}</label>
+            </div>
+
+            <!-- Payment Options -->
+            <div class="payment-options">
+                <!-- Ideal Payment button -->
+                <div class="option payment-button" onclick="submitPayment('{{.ID}}')">
+                    <h3>iDeal<img src="/static/img/IDEAL.png" alt="ideal logo"></h3>     
+                </div>
+                <!-- Credit Card Payment Button -->
+                <div class="option payment-button" onclick="submitPayment('{{.ID}}')">
+                    <h3>Credit<img src="/static/img/credit.png" alt="creditcard logo"></h3>
+                </div>
+            </div>
+
+            {{.Beers}}
+        </div>
+    </div>
+
+    <!-- Submitting the Payment -->
+    <script src="/static/js/order.js"></script>
+</body>
+</html>

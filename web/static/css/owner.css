@@ -1,0 +1,124 @@
+html, body, h1, h2, h3, p {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #fffcca;
+    color: #110C52;
+    height: 100vh;
+    width: 100vw;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    margin: 0;
+}
+
+.title {
+    position: relative;
+    height: 35%;
+    overflow: hidden;
+}
+
+.title-card {
+    position: relative;
+    background-color: #fff27cbb;
+    top: 20%;
+    height: 50%;
+    width: 90%;
+    margin: auto;
+    padding: 0 2.5%;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 5px 5px #110C52;
+}
+
+.title-card h1 {
+    position: relative;
+    top: 10px;
+    padding: 0;
+    margin: 0;
+    height: fit-content;
+    font-size: 72px;
+    text-shadow: 5px 5px #FFA7A7;
+    font-style: italic;
+    text-align: center;
+}
+
+#title-underline {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    height: 0;
+    top: -25px;
+}
+
+.introduction {
+    position: absolute;
+    bottom: 10%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #110c5281;
+}
+
+.body {
+    position: relative;
+    height: 65%;
+    overflow: hidden;
+}
+
+.body h2 {
+    position: relative;
+    height: fit-content;
+    background-color: #fff27cbb;
+    text-shadow: 2px 2px #FFA7A7;
+    font-style: italic;
+    text-align: center;
+    font-size: 28px;
+    border-radius: 5px;
+    margin: 0px 2.5% 10% 2.5%;
+    padding: 0px 3px 2px 3px;
+    box-shadow: 5px 5px;
+}
+
+.storage-info {
+    position: relative;
+    height: 275px;
+    font-size: 28px;
+    overflow: hidden;
+}
+
+.bar-container {
+    position: relative;
+    float: right;
+    margin-right: 2.5%;
+    height: 100%;
+    width: 105px;
+}
+
+.bar-background {
+    position: absolute;
+    background: url("../img/empty_beerglass.png") repeat-x 0 0 #ffffff00;
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    width: 100%;
+}
+
+.bar {
+    position: absolute;
+    background-color: #fff27cbb;
+    margin: 2.5%;
+    width: 95%;
+    animation: grow 1.5s ease-out forwards;
+    transform-origin: bottom;
+}
+
+@keyframes grow {
+    from {
+        transform: scaleY(0);
+    }
+}

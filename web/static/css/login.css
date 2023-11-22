@@ -1,0 +1,64 @@
+/* Define custom CSS variables for consistent color usage */
+:root {
+    --background-color: #fffcca;       /* Background color */
+    --text-color: #110C52;             /* Text color */
+    --popup-background: #fff27cbb;     /* Popup background color */
+    --error-text-color: #ff0000;
+    --popup-border: #000000;           /* Popup border color */
+    --box-shadow-color: #110C52;       /* Box shadow color */
+}
+
+/* Reset default browser styles for the body */
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--background-color);
+    color: var(--text-color);
+    height: 100vh;
+    width: 100vw;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Styling for the popup box */
+#popupbox {
+    padding: 5%;
+    width: 85%;
+    max-width: 600px;
+    background: var(--popup-background);
+    border-radius: 15px;
+    box-shadow: 5px 5px var(--box-shadow-color);
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Styling for the heading within the popup */
+#popupbox h1 {
+    font-size: 36px;
+    margin: 0 0 5% 0;
+}
+
+/* Styling for labels within the popup */
+#popupbox label {
+    display: block;
+}
+
+/* Styling for password input and submit button */
+#popupbox input[type="password"],
+#popupbox input[type="submit"] {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 90%;
+    height: fit-content;
+    margin-bottom: 2.5%;
+    font-size: 24px;
+} 
+
+/* Styling for error messages */
+#error {
+    color: var(--error-text-color);
+    text-align: left;
+    font-size: 18px;
+}

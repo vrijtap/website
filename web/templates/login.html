@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/static/img/favicon-32x32.png" sizes="32x32">
+    <title>Login - Vrijtap</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/login.css">
+</head>
+<body>
+    <div id="popupbox">
+        <!-- Login form -->
+        <form id="form" name="loginForm" action="/owner" method="POST" onsubmit="submitLogin(event, '{{.Method}}')">
+            <!-- Form title -->
+            <h1 id="form-label">{{.Action}}</h1>
+            <!-- Password input field -->
+            <input id="password" name="password" type="password" size="14"/>
+            <p id="error"></p>
+            <!-- Submit button -->
+            <input type="submit" name="submit" value="Submit" />
+        </form>
+    </div>
+    
+    <script src="/static/js/login.js"></script>
+</body>
+</html>
