@@ -15,17 +15,34 @@
             <h1 id="title-underline">-----------</h1>
         </div>
         <p class="introduction">Welcome to the Statistics<br>for {{.Name}}</p>
-    </div>    
+    </div>
 
     <!-- Beer Meter -->
     <div class="body">
         <h2>Storage</h1>
         <div class="storage-info">
             <div class="bar-container">
-                <div class="bar" style="height: 82%; top: 14%;"></div>
+                <div id="bar-handler" class="bar" style="height: 96%; top: 0%;"></div>
                 <div class="bar-background"></div>
             </div>
         </div>
     </div>
+
+    <script src="/static/js/owner.js"></script>
+    <script>
+        function fetchAndUpdateCapacity() {
+            getWeight('http://127.0.0.1:5000/capacity')
+                .then(capacityValue => {
+                    updateBarStyle('bar-handler', capacityValue)
+                })
+                .catch(error => {
+                    // Handle errors from the fetch operation or conversion
+                    console.error('Error in fetch operation:', error);
+                });
+        }
+
+        // Run the function every second
+        setInterval(fetchAndUpdateCapacity, 1000);
+    </script>
 </body>
 </html>
