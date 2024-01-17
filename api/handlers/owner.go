@@ -40,7 +40,8 @@ func OwnerGet(w http.ResponseWriter, r *http.Request) {
 		// Render the owner page if everything is correct
 		templates.RenderTemplate(w, "owner.html", struct {
 			Name string
-		}{"WIP"})
+			RaspberryEndpoint string
+		}{"WIP", os.Getenv("RASPBERRY_ENDPOINT")})
 	}
 }
 
