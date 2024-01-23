@@ -59,30 +59,56 @@ func validatePassword(w http.ResponseWriter, pwd string) []error {
 
 // OwnerGet handles GET requests meant for viewing the statistics page
 func OwnerGet(w http.ResponseWriter, r *http.Request) {
-	// Check the authentication
 	authHeader := r.Header.Get("Authorization")
+	var data interface{}
+	var page string
+
+	// Check the authentication
 	if authHeader != "" {
 		passwordMutex.Lock()
 		if changePassword == true {
-			// Render the update password page if the flag is set
-			templates.RenderTemplate(w, "login.html", struct {
+			// Setup the login page variables
+			data = struct {
 				Method string
 				Action string
-			}{"PUT", "Change Password"})
+			}{
+				"PUT",
+				"Change Password",
+			}
+			page = "login.html"
 		} else {
-			// Render the owner page if everything is correct
-			templates.RenderTemplate(w, "owner.html", struct {
+			// Setup the owner page variables
+			data = struct {
 				Name              string
 				RaspberryEndpoint string
-			}{os.Getenv("NAME"), os.Getenv("RASPBERRY_ENDPOINT")})
+			}{
+				os.Getenv("NAME"),
+				os.Getenv("RASPBERRY_ENDPOINT"),
+			}
+			page = "owner.html"
 		}
 		passwordMutex.Unlock()
 	} else {
-		// Render the login page if the user is not authenticated
-		templates.RenderTemplate(w, "login.html", struct {
+		// Setup the login page variables
+		data = struct {
 			Method string
 			Action string
-		}{"POST", "Enter Password"})
+		}{
+			"POST",
+			"Enter Password",
+		}
+		page = "login.html"
+	}
+
+	// Set the Content-Type header to specify that the response is HTML
+	w.Header().Set("Content-Type", "text/html")
+
+	// Render the page
+	err := templates.RenderHTML(w, page, data)
+	if err != nil {
+		errMsg := "Failed to render HTML template"
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
 	}
 }
 

@@ -1,22 +1,37 @@
 package templates
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 )
 
-var templates *template.Template
+// Templates struct to store parsed templates
+type Templates struct {
+    HTML *template.Template
+}
+var t Templates
 
-// LoadTemplates parses the templates stored in the web directory into a public variable.
-func LoadTemplates() *template.Template {
-	templates = template.Must(template.ParseGlob("web/templates/*.html"))
-	return templates
+// Load parses the templates stored in the web directory into a public variable.
+func Load(path string) error {
+	// Parse the html files
+	pattern := fmt.Sprintf("%s*.html", path)
+    htmlTemplates, err := template.ParseGlob(pattern)
+    if err != nil {
+        return err
+    }
+
+	// Store the parsed templates
+	t.HTML = htmlTemplates
+
+	return nil
 }
 
-// renderTemplate renders the specified HTML template with data
-func RenderTemplate(w http.ResponseWriter, templateName string, data interface{}) {
-	err := templates.ExecuteTemplate(w, templateName, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+// RenderHTML inserts data into an HTML template and writes the result to the response
+func RenderHTML(w http.ResponseWriter, templateName string, data interface{}) error {
+    err := t.HTML.ExecuteTemplate(w, templateName, data)
+    if err != nil {
+        return err
+    }
+    return nil
 }

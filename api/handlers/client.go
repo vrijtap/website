@@ -35,8 +35,8 @@ func ClientGet(w http.ResponseWriter, r *http.Request) {
 	// Convert the price to float for formatting
 	price, err := strconv.ParseFloat(os.Getenv("PRICE"), 64)
 
-	// Render the client.html template with environment variables and card data
-	templates.RenderTemplate(w, "client.html", struct {
+	// Setup the client page variables
+	data := struct {
 		Name    string
 		Price   string
 		Beers   uint
@@ -46,5 +46,16 @@ func ClientGet(w http.ResponseWriter, r *http.Request) {
 		Price: 	fmt.Sprintf("%.2f", price),
 		Beers: 	card.Beers,
 		ID:		uint(card.ServerID),
-	})
+	}
+
+	// Set the Content-Type header to specify that the response is HTML
+	w.Header().Set("Content-Type", "text/html")
+
+	// Render the client page
+	err = templates.RenderHTML(w, "client.html", data)
+	if err != nil {
+		errMsg := "Failed to render HTML template"
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
 }

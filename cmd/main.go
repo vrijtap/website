@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 	"os"
+	"website/internal/app"
 	"website/internal/environment"
 	"website/internal/password"
 	"website/internal/server"
 	"website/utils/database"
 	"website/utils/database/models/cards"
-	"website/web/templates"
 )
 
 // initAdminCard initializes an admin (testing) card for the backend if it doesn't already exist.
@@ -36,8 +36,10 @@ func main() {
 		log.Fatalf("Error loading password: %v", err)
 	}
 
-	// Load templates
-	templates.LoadTemplates()
+	// Initialize the application
+    if err := app.Initialize("./"); err != nil {
+        log.Fatalf("[Error] %v", err)
+    }
 
 	// Initialize MongoDB
 	if err := database.Connect(os.Getenv("MONGO_URI")); err != nil {
