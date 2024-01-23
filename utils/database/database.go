@@ -1,11 +1,12 @@
 package database
 
 import (
-    "context"
-    "fmt"
-    "sync"
-    "go.mongodb.org/mongo-driver/mongo"
-    "go.mongodb.org/mongo-driver/mongo/options"
+	"context"
+	"log"
+	"sync"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
@@ -49,7 +50,7 @@ func Connect(uri, database string) error {
     db = client.Database(database)
 
     // Log the initialization
-    fmt.Println("Connected to MongoDB")
+    log.Println("Connected to MongoDB")
 
     return nil
 }

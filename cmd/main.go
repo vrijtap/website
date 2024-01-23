@@ -1,27 +1,16 @@
 package main
 
 import (
-	"context"
-	"log"
-	"os"
 	"website/internal/app"
 	"website/internal/server"
-	"website/utils/database"
-	"website/utils/database/models/cards"
-)
 
-// initAdminCard initializes an admin (testing) card for the backend if it doesn't already exist.
-func initAdminCard() {
-	card, err := cards.GetByServerID(context.TODO(), 0)
-	if card == nil && err != nil {
-		card, err := cards.New(context.TODO())
-		if err != nil {
-			log.Fatalf("Error creating test card: %v", err)
-		}
-		card.ServerID = 0
-		cards.Insert(context.TODO(), &card)
-	}
-}
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"sync"
+	"net/http"
+)
 
 func main() {
 	// Initialize the application
@@ -29,54 +18,64 @@ func main() {
         log.Fatalf("[Error] %v", err)
     }
 
-	// Close database on dereference
-	defer func() {
-		if err := database.Disconnect(); err != nil {
-			log.Fatalf("Error closing MongoDB connection: %v", err)
+	// Start the API based on the environment
+	var api *http.Server
+
+	// Create a channel to receive interrupt signals
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	// Create a WaitGroup to synchronize goroutines
+	var wg sync.WaitGroup
+
+	// Goroutine to handle interrupt signal
+	go func() {
+		// Wait for the interrupt signal
+		<-interrupt
+
+		// Increment WaitGroup counter to indicate the start of this goroutine
+		wg.Add(1)
+
+		// Clean up resources and gracefully exit
+		if err := app.Clean(api); err != nil {
+			log.Printf("[Warning] %v", err)
 		}
+
+		// Exit the program
+		os.Exit(0)
 	}()
 
-	// Create the admin card
-	initAdminCard()
-
-	// Start the API based on the environment
+	// Start the server
 	if os.Getenv("ENVIRONMENT") == "production" {
 		// Create HTTPS server
-		httpsServer := server.CreateHTTPSServer(
+		api = server.CreateHTTPSServer(
 			os.Getenv("PORT_HTTPS"),
 			os.Getenv("PATH_CERT_FILE"),
 			os.Getenv("PATH_KEY_FILE"),
 		)
 
-		// Close server on dereference
-		defer func() {
-			if err := httpsServer.Close(); err != nil {
-				log.Fatalf("Error closing HTTPS server: %v", err)
-			}
-		}()
-
 		// Start HTTPS server
 		log.Printf("Listening to port %s for HTTPS requests...\n", os.Getenv("PORT_HTTPS"))
-		if err := httpsServer.ListenAndServeTLS("", ""); err != nil {
+		if err := api.ListenAndServeTLS("", ""); err != nil {
 			log.Printf("%v", err)
 		}
 	} else {
 		// Create HTTP server
-		httpServer := server.CreateHTTPServer(
+		api = server.CreateHTTPServer(
 			os.Getenv("PORT_HTTP"),
 		)
 
-		// Close server on dereference
-		defer func() {
-			if err := httpServer.Close(); err != nil {
-				log.Fatalf("Error closing HTTP server: %v", err)
-			}
-		}()
-
 		// Start HTTP server
 		log.Printf("Listening to port %s for HTTP requests...\n", os.Getenv("PORT_HTTP"))
-		if err := httpServer.ListenAndServe(); err != nil {
+		if err := api.ListenAndServe(); err != nil {
 			log.Printf("%v", err)
 		}
 	}
+
+	// Wait for priority and exit
+	wg.Wait()
+	if err := app.Clean(api); err != nil {
+		log.Printf("[Warning] %v", err)
+	}
+	os.Exit(1)
 }
