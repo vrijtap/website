@@ -72,7 +72,7 @@ func OwnerGet(w http.ResponseWriter, r *http.Request) {
 			templates.RenderTemplate(w, "owner.html", struct {
 				Name string
 				RaspberryEndpoint string
-			}{"WIP", os.Getenv("RASPBERRY_ENDPOINT")})
+			}{os.Getenv("NAME"), os.Getenv("RASPBERRY_ENDPOINT")})
 		}
 		passwordMutex.Unlock()
 	} else {
