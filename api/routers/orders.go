@@ -1,18 +1,19 @@
 package routers
 
 import (
-    "net/http"
-    "github.com/gorilla/mux"
     "website/api/handlers"
+
+    "net/http"
+
+    "github.com/gorilla/mux"
 )
 
-// ConfigureOrderRoutes configures the routes related to orders.
-func ConfigureOrderRoutes(r *mux.Router) {
-    orderRouter := r.PathPrefix("/order").Subrouter()
+// ConfigureOrderRoutes sets up order-related routes on a provided Gorilla Mux router
+func ConfigureOrderRoutes(router *mux.Router) {
+    // Create a subrouter for order-related routes under the "/order" path
+    orderRouter := router.PathPrefix("/order").Subrouter()
 
-    // Handle POST requests for creating orders.
+    // Define routes for order-related endpoints
     orderRouter.HandleFunc("", handlers.OrderPost).Methods(http.MethodPost)
-
-    // Handle PUT requests for updating order statuses.
     orderRouter.HandleFunc("/{order_id}", handlers.OrderUpdateStatus).Methods(http.MethodPost)
 }

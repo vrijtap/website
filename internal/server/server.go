@@ -8,32 +8,30 @@ import (
 	"net/http"
 )
 
-// NewHTTPServer creates and configures an HTTP server.
-func NewHTTPServer(portHTTP, portHTTPS string) *http.Server {
-	// Return the server
+// CreateHTTPServer creates and configures an HTTP server.
+func CreateHTTPServer(portHTTP string) *http.Server {
 	return &http.Server{
-		Addr:    fmt.Sprintf(`:%s`, portHTTP),
-		Handler: routers.HTTPRouter(portHTTPS),
+		Addr:    fmt.Sprintf(":%s", portHTTP),
+		Handler: routers.CreateApiRouter(),
 	}
 }
 
-// NewHTTPSServer creates and configures an HTTPS server.
-func NewHTTPSServer(portHTTPS, certFilePath, keyFilePath string) *http.Server {
-	// Load in the TLS certificates
+// CreateHTTPSServer creates and configures an HTTPS server with TLS certificates.
+func CreateHTTPSServer(portHTTPS, certFilePath, keyFilePath string) *http.Server {
+	// Load TLS certificates
 	tlsCert, err := tls.LoadX509KeyPair(certFilePath, keyFilePath)
 	if err != nil {
 		log.Fatalf("Error loading certificate and key file: %v", err)
 	}
 
-	// Create the TLS configuration
+	// Configure TLS
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{tlsCert},
 	}
 
-	// Return the server
 	return &http.Server{
-		Addr:      fmt.Sprintf(`:%s`, portHTTPS),
-		Handler:   routers.HTTPSRouter(),
+		Addr:      fmt.Sprintf(":%s", portHTTPS),
+		Handler:   routers.CreateApiRouter(),
 		TLSConfig: tlsConfig,
 	}
 }

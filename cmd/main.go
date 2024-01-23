@@ -57,7 +57,7 @@ func main() {
 	// Start the API based on the environment
 	if os.Getenv("ENVIRONMENT") == "production" {
 		// Create HTTPS server
-		httpsServer := server.NewHTTPSServer(
+		httpsServer := server.CreateHTTPSServer(
 			os.Getenv("PORT_HTTPS"),
 			os.Getenv("PATH_CERT_FILE"),
 			os.Getenv("PATH_KEY_FILE"),
@@ -77,9 +77,8 @@ func main() {
 		}
 	} else {
 		// Create HTTP server
-		httpServer := server.NewHTTPServer(
+		httpServer := server.CreateHTTPServer(
 			os.Getenv("PORT_HTTP"),
-			os.Getenv("PORT_HTTPS"),
 		)
 
 		// Close server on dereference

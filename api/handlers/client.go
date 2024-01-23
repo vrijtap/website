@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"website/utils/database/models/cards"
+	"website/web/templates"
+	
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
-	"website/utils/database/models/cards"
-	"website/web/templates"
 
 	"github.com/gorilla/mux"
 )
