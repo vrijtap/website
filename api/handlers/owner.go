@@ -1,84 +1,25 @@
 package handlers
 
 import (
+	"backend/internal/password"
+	"backend/utils/jwt"
+	"backend/web/templates"
 	"encoding/json"
 	"net/http"
 	"os"
-	"backend/internal/password"
-	"backend/utils/sessions"
-	"backend/web/templates"
+	"sync"
 )
 
+// Globals for changing the password
+var (
+	passwordMutex   sync.Mutex
+	changePassword  = false
+)
+
+// Type for reporting password update errors
 type ErrorResponse struct {
     Errors  []string `json:"errors"`
     Message string   `json:"message"`
-}
-
-// OwnerGet handles GET requests meant for viewing the statistics page
-func OwnerGet(w http.ResponseWriter, r *http.Request) {
-	// Get the owner session
-	session, err := sessions.Get(w, r, "owner-auth")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Check if the owner is authenticated
-	if auth, ok := session.Values["authenticated"].(bool); !auth || !ok {
-		// Render the login page if the user is not authenticated
-		templates.RenderTemplate(w, "login.html", struct {
-			Method string
-			Action string
-		}{"POST", "Enter Password"})
-	} else if check, ok := session.Values["changePassword"].(bool); check && ok {
-		// Render the update password page if the flag is set
-		templates.RenderTemplate(w, "login.html", struct {
-			Method string
-			Action string
-		}{"PUT", "Change Password"})
-	} else {
-		// Render the owner page if everything is correct
-		templates.RenderTemplate(w, "owner.html", struct {
-			Name string
-			RaspberryEndpoint string
-		}{"WIP", os.Getenv("RASPBERRY_ENDPOINT")})
-	}
-}
-
-// OwnerPost handles POST requests meant for gaining auth
-func OwnerPost(w http.ResponseWriter, r *http.Request) {
-	// Check if the password is present
-	pwd := r.FormValue("password")
-	if pwd == "" {
-		http.Error(w, "Password is missing", http.StatusBadRequest)
-		return
-	}
-
-	// Get the owner session
-	session, err := sessions.Get(w, r, "owner-auth")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Check if the password is correct
-	if password.Check(pwd) {
-		// Set the session variables
-		session.Values["authenticated"] = true
-		if pwd == os.Getenv("PASSWORD_DEFAULT") {
-			session.Values["changePassword"] = true
-		}
-
-		// Save the session
-		err := session.Save(r, w)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-	} else {
-		http.Error(w, "Incorrect password", http.StatusUnauthorized)
-		return
-	}
 }
 
 // validatePassword validates if a provided password is up to standards
@@ -114,40 +55,104 @@ func validatePassword(w http.ResponseWriter, pwd string) []error {
 	return nil
 }
 
-func OwnerPut(w http.ResponseWriter, r *http.Request) {
-	// Get the owner session
-	session, err := sessions.Get(w, r, "owner-auth")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+// OwnerGet handles GET requests meant for viewing the statistics page
+func OwnerGet(w http.ResponseWriter, r *http.Request) {
+	// Check the authentication
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" {
+		passwordMutex.Lock()
+		if changePassword == true {
+			// Render the update password page if the flag is set
+			templates.RenderTemplate(w, "login.html", struct {
+				Method string
+				Action string
+			}{"PUT", "Change Password"})
+		} else {
+			// Render the owner page if everything is correct
+			templates.RenderTemplate(w, "owner.html", struct {
+				Name string
+				RaspberryEndpoint string
+			}{"WIP", os.Getenv("RASPBERRY_ENDPOINT")})
+		}
+		passwordMutex.Unlock()
+	} else {
+		// Render the login page if the user is not authenticated
+		templates.RenderTemplate(w, "login.html", struct {
+			Method string
+			Action string
+		}{"POST", "Enter Password"})
+	}
+}
+
+// OwnerLogin handles POST requests meant for gaining auth
+func OwnerLogin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Get the passed password
+	pwd := r.FormValue("password")
+	if pwd == "" {
+		http.Error(w, "Password is missing", http.StatusBadRequest)
 		return
 	}
 
-	// Check if the owner is authenticated
-	if auth, ok := session.Values["authenticated"].(bool); !auth || !ok {
-		http.Error(w, "Session is not valid or authenticated", http.StatusUnauthorized)
+	// Check if the password is correct
+	if password.Check(pwd) {
+		// Generate a JWT token
+        tokenString, err := jwt.CreateToken()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+			return
+		}
+
+		// Set the JWT token as a cookie
+		http.SetCookie(w, &http.Cookie{
+    		Name:  "token",
+    		Value: tokenString,
+			SameSite: http.SameSiteStrictMode,
+    		Secure: false,
+		})
+
+		// If the default password was used, request a change
+		if pwd == os.Getenv("PASSWORD_DEFAULT") {
+			passwordMutex.Lock()
+			changePassword = true
+			passwordMutex.Unlock()
+		}
+
+		// Write back the auth token
+		w.Header().Set("Authorization", "Bearer " + tokenString)
+		w.WriteHeader(http.StatusOK)
+		return
+	} else {
+		http.Error(w, "Incorrect password", http.StatusUnauthorized)
+		return
+	}
+}
+
+func OwnerPut(w http.ResponseWriter, r *http.Request) {
+	// Check the authentication
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	// Get the password from the form
 	pwd := r.FormValue("password")
-
-	// Validate the input
 	if err := validatePassword(w, pwd); err != nil {
 		return
 	}
 
 	// Change the password
-	err = password.ChangeTo(pwd)
+	err := password.ChangeTo(pwd)
 	if err != nil {
 		http.Error(w, "Failed to save password", http.StatusInternalServerError)
 		return
 	}
 
-	// Update the user session
-	session.Values["changePassword"] = false
-	err = session.Save(r, w)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+	// Indicate that the password was changed
+	passwordMutex.Lock()
+	changePassword = false
+	passwordMutex.Unlock()
 }

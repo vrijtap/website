@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backend/payment/fakepay"
+	"backend/internal/fakepay"
 	"backend/utils/database/models/cards"
 	"backend/utils/database/models/orders"
 	"encoding/json"

@@ -9,7 +9,6 @@ import (
 	"backend/internal/server"
 	"backend/utils/database"
 	"backend/utils/database/models/cards"
-	"backend/utils/sessions"
 	"backend/web/templates"
 )
 
@@ -54,9 +53,6 @@ func main() {
 
 	// Create the admin card
 	initAdminCard()
-
-	// Initialize server sessions
-	sessions.Initialize(os.Getenv("SERVER_SECRET"))
 
 	// Start the API based on the environment
 	if os.Getenv("ENVIRONMENT") == "production" {
