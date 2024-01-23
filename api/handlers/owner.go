@@ -16,14 +16,15 @@ var (
 	changePassword  = false
 )
 
-// Type for reporting password update errors
+// ErrorResponse represents the structure for reporting password update errors
 type ErrorResponse struct {
-    Errors  []string `json:"errors"`
-    Message string   `json:"message"`
+	Errors  []string `json:"errors"`
+	Message string   `json:"message"`
 }
 
 // validatePassword validates if a provided password is up to standards
 func validatePassword(w http.ResponseWriter, pwd string) []error {
+	// Validate the provided password
 	validationErrors := password.Validate(pwd)
 
 	if validationErrors != nil {
@@ -32,19 +33,19 @@ func validatePassword(w http.ResponseWriter, pwd string) []error {
 			Errors:  make([]string, len(validationErrors)),
 			Message: "Update the password according to these errors",
 		}
-	
+
 		// Populate the error messages directly in the struct
 		for i, err := range validationErrors {
 			errorResponse.Errors[i] = err.Error()
 		}
-	
+
 		// Marshal the struct to JSON and send the response
 		jsonResponse, err := json.Marshal(errorResponse)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return validationErrors
 		}
-	
+
 		// Write the response in a single step
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -70,7 +71,7 @@ func OwnerGet(w http.ResponseWriter, r *http.Request) {
 		} else {
 			// Render the owner page if everything is correct
 			templates.RenderTemplate(w, "owner.html", struct {
-				Name string
+				Name              string
 				RaspberryEndpoint string
 			}{os.Getenv("NAME"), os.Getenv("RASPBERRY_ENDPOINT")})
 		}
@@ -98,7 +99,7 @@ func OwnerLogin(w http.ResponseWriter, r *http.Request) {
 	// Check if the password is correct
 	if password.Check(pwd) {
 		// Generate a JWT token
-        tokenString, err := jwt.CreateToken()
+		tokenString, err := jwt.CreateToken()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
@@ -107,10 +108,10 @@ func OwnerLogin(w http.ResponseWriter, r *http.Request) {
 
 		// Set the JWT token as a cookie
 		http.SetCookie(w, &http.Cookie{
-    		Name:  "token",
-    		Value: tokenString,
+			Name:     "token",
+			Value:    tokenString,
 			SameSite: http.SameSiteStrictMode,
-    		Secure: false,
+			Secure:   false,
 		})
 
 		// If the default password was used, request a change
@@ -121,7 +122,7 @@ func OwnerLogin(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Write back the auth token
-		w.Header().Set("Authorization", "Bearer " + tokenString)
+		w.Header().Set("Authorization", "Bearer "+tokenString)
 		w.WriteHeader(http.StatusOK)
 		return
 	} else {
@@ -130,6 +131,7 @@ func OwnerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// OwnerPut handles PUT requests meant for changing the password
 func OwnerPut(w http.ResponseWriter, r *http.Request) {
 	// Check the authentication
 	authHeader := r.Header.Get("Authorization")
