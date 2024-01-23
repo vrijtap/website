@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 	"os"
-	"backend/internal/environment"
-	"backend/internal/password"
-	"backend/internal/server"
-	"backend/utils/database"
-	"backend/utils/database/models/cards"
-	"backend/web/templates"
+	"website/internal/environment"
+	"website/internal/password"
+	"website/internal/server"
+	"website/utils/database"
+	"website/utils/database/models/cards"
+	"website/web/templates"
 )
 
 // initAdminCard initializes an admin (testing) card for the backend if it doesn't already exist.

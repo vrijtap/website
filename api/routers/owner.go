@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"backend/api/handlers"
-	"backend/internal/middleware"
+	"website/api/handlers"
+	"website/internal/middleware"
 	"net/http"
 
 	"github.com/gorilla/mux"

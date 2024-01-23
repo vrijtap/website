@@ -3,7 +3,7 @@ package routers
 import (
     "net/http"
     "github.com/gorilla/mux"
-    "backend/api/handlers"
+    "website/api/handlers"
 )
 
 // ConfigureOrderRoutes configures the routes related to orders.

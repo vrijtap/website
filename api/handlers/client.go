@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"backend/utils/database/models/cards"
-	"backend/web/templates"
+	"website/utils/database/models/cards"
+	"website/web/templates"
 
 	"github.com/gorilla/mux"
 )

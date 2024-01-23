@@ -3,7 +3,7 @@ package routers
 import (
 	"net/http"
 	"github.com/gorilla/mux"
-	"backend/internal/middleware"
+	"website/internal/middleware"
 )
 
 // HTTPRouter configures the HTTP router for redirecting to HTTPS.

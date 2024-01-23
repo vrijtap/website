@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"backend/internal/password"
-	"backend/utils/jwt"
-	"backend/web/templates"
+	"website/internal/password"
+	"website/utils/jwt"
+	"website/web/templates"
 	"encoding/json"
 	"net/http"
 	"os"

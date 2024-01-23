@@ -3,7 +3,7 @@ package routers
 import (
 	"net/http"
 	"github.com/gorilla/mux"
-	"backend/api/handlers"
+	"website/api/handlers"
 )
 
 // ConfigureClientRoutes sets up client-related routes

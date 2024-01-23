@@ -3,7 +3,7 @@ package cards
 import (
 	"context"
 	"time"
-	"backend/utils/database"
+	"website/utils/database"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
