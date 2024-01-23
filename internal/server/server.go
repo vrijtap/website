@@ -12,7 +12,7 @@ import (
 func CreateHTTPServer(portHTTP string) *http.Server {
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%s", portHTTP),
-		Handler: routers.CreateApiRouter(),
+		Handler: routers.CreateAPIRouter(),
 	}
 }
 
@@ -31,7 +31,7 @@ func CreateHTTPSServer(portHTTPS, certFilePath, keyFilePath string) *http.Server
 
 	return &http.Server{
 		Addr:      fmt.Sprintf(":%s", portHTTPS),
-		Handler:   routers.CreateApiRouter(),
+		Handler:   routers.CreateAPIRouter(),
 		TLSConfig: tlsConfig,
 	}
 }
