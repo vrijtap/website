@@ -19,7 +19,7 @@ func main() {
     }
 
 	// Start the API based on the environment
-	var api *http.Server
+	var apiServer *http.Server
 
 	// Create a channel to receive interrupt signals
 	interrupt := make(chan os.Signal, 1)
@@ -37,7 +37,7 @@ func main() {
 		wg.Add(1)
 
 		// Clean up resources and gracefully exit
-		if err := app.Clean(api); err != nil {
+		if err := app.Clean(apiServer); err != nil {
 			log.Printf("[Warning] %v", err)
 		}
 
@@ -48,7 +48,7 @@ func main() {
 	// Start the server
 	if os.Getenv("ENVIRONMENT") == "production" {
 		// Create HTTPS server
-		api = server.CreateHTTPSServer(
+		apiServer = server.CreateHTTPSServer(
 			os.Getenv("PORT_HTTPS"),
 			os.Getenv("PATH_CERT_FILE"),
 			os.Getenv("PATH_KEY_FILE"),
@@ -56,25 +56,25 @@ func main() {
 
 		// Start HTTPS server
 		log.Printf("Listening to port %s for HTTPS requests...\n", os.Getenv("PORT_HTTPS"))
-		if err := api.ListenAndServeTLS("", ""); err != nil {
+		if err := apiServer.ListenAndServeTLS("", ""); err != nil {
 			log.Printf("%v", err)
 		}
 	} else {
 		// Create HTTP server
-		api = server.CreateHTTPServer(
+		apiServer = server.CreateHTTPServer(
 			os.Getenv("PORT_HTTP"),
 		)
 
 		// Start HTTP server
 		log.Printf("Listening to port %s for HTTP requests...\n", os.Getenv("PORT_HTTP"))
-		if err := api.ListenAndServe(); err != nil {
+		if err := apiServer.ListenAndServe(); err != nil {
 			log.Printf("%v", err)
 		}
 	}
 
 	// Wait for priority and exit
 	wg.Wait()
-	if err := app.Clean(api); err != nil {
+	if err := app.Clean(apiServer); err != nil {
 		log.Printf("[Warning] %v", err)
 	}
 	os.Exit(1)
