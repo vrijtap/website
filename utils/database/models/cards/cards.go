@@ -21,20 +21,22 @@ type Card struct {
 
 // findHighestQR finds the highest QR value in the "cards" collection in MongoDB
 func findHighestServerID(ctx context.Context) (uint64, error) {
+	// Setup the database request
 	collection := database.GetCollection("cards")
-
-	// Set sorting options to sort by "server_id" field in descending order (value: -1)
 	findOptions := options.FindOne().SetSort(bson.D{{Key: "server_id", Value: -1}})
 
-	// Find the document with the highest "server_id" value and decode it into the 'card' variable
+	// Get the card from the collection "cards" with the highest server ID
 	var card Card
 	err := collection.FindOne(ctx, bson.M{}, findOptions).Decode(&card)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return 0, nil
+		} else {
+			return 0, err
 		}
-		return 0, err
 	}
+
+	// If no error was received, return the highest ServerID
 	return card.ServerID, nil
 }
 
@@ -56,40 +58,56 @@ func New(ctx context.Context) (Card, error) {
 
 // GetByServerID retrieves a card document from MongoDB by its Server ID
 func GetByServerID(ctx context.Context, ServerID uint64) (*Card, error) {
+	// Setup the database request
 	collection := database.GetCollection("cards")
 	filter := bson.M{"server_id": ServerID}
+
+	// Get the card from the collection "cards"
 	var card Card
 	err := collection.FindOne(ctx, filter).Decode(&card)
 	if err != nil {
 		return nil, err
 	}
+
+	// If no error was received, return the card
 	return &card, nil
 }
 
 // GetByID retrieves a card document from MongoDB by its ObjectID
 func GetByID(ctx context.Context, cardID primitive.ObjectID) (*Card, error) {
+	// Setup the database request
 	collection := database.GetCollection("cards")
 	filter := bson.M{"_id": cardID}
+
+	// Get the card from the collection "cards"
 	var card Card
 	err := collection.FindOne(ctx, filter).Decode(&card)
 	if err != nil {
 		return nil, err
 	}
+
+	// If no error was received, return the card
 	return &card, nil
 }
 
 // Insert adds a new card document to the "cards" collection in MongoDB for testing
 func Insert(ctx context.Context, card *Card) error {
+	// Setup the database request
 	collection := database.GetCollection("cards")
+
+	// Insert the card into the collection "cards"
 	_, err := collection.InsertOne(ctx, card)
 	return err
 }
 
 // UpdateByID updates an existing card document in the "cards" collection in MongoDB by its ID
 func UpdateByID(ctx context.Context, cardID primitive.ObjectID, updates bson.M) error {
+	// Setup the database request
 	collection := database.GetCollection("cards")
 	filter := bson.M{"_id": cardID}
 	update := bson.M{"$set": updates}
+
+	// Update the card in the collection "cards"
 	_, err := collection.UpdateOne(ctx, filter, update)
 	return err
 }
