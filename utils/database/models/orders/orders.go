@@ -1,10 +1,12 @@
 package orders
 
 import (
+    "website/utils/database"
+
     "context"
     "time"
     "math"
-    "website/utils/database"
+    "errors"
 
     "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,42 +35,51 @@ func New(cardID primitive.ObjectID, quantity uint, price float64) Order {
 
 // GetByID retrieves an order document from MongoDB by its ID
 func GetByID(ctx context.Context, orderID primitive.ObjectID) (*Order, error) {
-    var order Order
-    collection := database.GetClient().Database("backend").Collection("orders")
+    // Setup the database request
+	collection := database.GetCollection("orders")
     filter := bson.M{"_id": orderID}
+
+    // Get the order from the collection "orders"
+    var order Order
     err := collection.FindOne(ctx, filter).Decode(&order)
     if err != nil {
         return nil, err
     }
+
+    // If no error was received, return the order
     return &order, nil
 }
 
 // Insert adds a new order document to the "orders" collection in MongoDB
 func Insert(ctx context.Context, order *Order) (*Order, error) {
-    collection := database.GetClient().Database("backend").Collection("orders")
-    result, err := collection.InsertOne(ctx, order)
+    // Setup the database request
+    collection := database.GetCollection("orders")
+
+    // Insert the order into the collection "orders"
+    insertOneResult , err := collection.InsertOne(ctx, order)
     if err != nil {
         return nil, err
     }
-    order.ID = result.InsertedID.(primitive.ObjectID)
+
+    // Assert the InsertedID as a primitive.ObjectID
+	id, ok := insertOneResult.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return nil, errors.New("Failed to assert InsertedID as primitive.ObjectID")
+	}
+
+    // If the assertion succeeds, return the inserted order
+    order.ID = id
     return order, nil
 }
 
 // UpdateStatus updates the status of an existing order document in the "orders" collection in MongoDB
 func UpdateStatus(ctx context.Context, orderID primitive.ObjectID, newStatus string) error {
-    collection := database.GetClient().Database("backend").Collection("orders")
-
-    // Define a filter to specify which order to update based on its ID
+    // Setup the database request
+    collection := database.GetCollection("orders")
     filter := bson.M{"_id": orderID}
-
-    // Define an update operation using the $set operator to modify the "status" field
     update := bson.M{"$set": bson.M{"status": newStatus}}
 
-    // Perform the update operation
+    // Update the order with the new status
     _, err := collection.UpdateOne(ctx, filter, update)
-    if err != nil {
-        return err
-    }
-
-    return nil
+    return err
 }

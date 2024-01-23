@@ -21,7 +21,7 @@ type Card struct {
 
 // findHighestQR finds the highest QR value in the "cards" collection in MongoDB
 func findHighestServerID(ctx context.Context) (uint64, error) {
-	collection := database.GetClient().Database("backend").Collection("cards")
+	collection := database.GetCollection("cards")
 
 	// Set sorting options to sort by "server_id" field in descending order (value: -1)
 	findOptions := options.FindOne().SetSort(bson.D{{Key: "server_id", Value: -1}})
@@ -56,7 +56,7 @@ func New(ctx context.Context) (Card, error) {
 
 // GetByServerID retrieves a card document from MongoDB by its Server ID
 func GetByServerID(ctx context.Context, ServerID uint64) (*Card, error) {
-	collection := database.GetClient().Database("backend").Collection("cards")
+	collection := database.GetCollection("cards")
 	filter := bson.M{"server_id": ServerID}
 	var card Card
 	err := collection.FindOne(ctx, filter).Decode(&card)
@@ -68,7 +68,7 @@ func GetByServerID(ctx context.Context, ServerID uint64) (*Card, error) {
 
 // GetByID retrieves a card document from MongoDB by its ObjectID
 func GetByID(ctx context.Context, cardID primitive.ObjectID) (*Card, error) {
-	collection := database.GetClient().Database("backend").Collection("cards")
+	collection := database.GetCollection("cards")
 	filter := bson.M{"_id": cardID}
 	var card Card
 	err := collection.FindOne(ctx, filter).Decode(&card)
@@ -80,14 +80,14 @@ func GetByID(ctx context.Context, cardID primitive.ObjectID) (*Card, error) {
 
 // Insert adds a new card document to the "cards" collection in MongoDB for testing
 func Insert(ctx context.Context, card *Card) error {
-	collection := database.GetClient().Database("backend").Collection("cards")
+	collection := database.GetCollection("cards")
 	_, err := collection.InsertOne(ctx, card)
 	return err
 }
 
 // UpdateByID updates an existing card document in the "cards" collection in MongoDB by its ID
 func UpdateByID(ctx context.Context, cardID primitive.ObjectID, updates bson.M) error {
-	collection := database.GetClient().Database("backend").Collection("cards")
+	collection := database.GetCollection("cards")
 	filter := bson.M{"_id": cardID}
 	update := bson.M{"$set": updates}
 	_, err := collection.UpdateOne(ctx, filter, update)

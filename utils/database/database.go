@@ -8,36 +8,45 @@ import (
     "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// MongoDB client and synchronization mutex
 var (
-    client     *mongo.Client
-    clientLock sync.Mutex
+	c		*mongo.Client
+    db		*mongo.Database
+    dbLock	sync.Mutex
 )
 
-// Connect initializes the MongoDB client and establishes a connection.
-func Connect(uri string) error {
+// Connect initializes the MongoDB client and establishes a connection
+func Connect(uri, database string) error {
+	// Check if the client is already connected
+	if c != nil {
+		// Disconnect the connection
+        if err := Disconnect(); err != nil {
+			return err
+		}
+    }
+
     // Use the SetServerAPIOptions() method to set the Stable API version to 1
-    apiOpts := options.ServerAPI(options.ServerAPIVersion1)
-    clientOpts := options.Client().ApplyURI(uri).SetServerAPIOptions(apiOpts)
+    apiOptions := options.ServerAPI(options.ServerAPIVersion1)
+    clientOptions := options.Client().ApplyURI(uri).SetServerAPIOptions(apiOptions)
 
     // Connect to MongoDB
-    c, err := mongo.Connect(context.Background(), clientOpts)
+    client, err := mongo.Connect(context.Background(), clientOptions)
     if err != nil {
         return err
     }
 
     // Ping MongoDB to verify the connection
-    err = c.Ping(context.Background(), nil)
+    err = client.Ping(context.Background(), nil)
     if err != nil {
         return err
     }
 
-    // Lock the mutex to safely set the client
-    clientLock.Lock()
-    defer clientLock.Unlock()
+	// Lock the mutex to safely set the client and database
+    dbLock.Lock()
+    defer dbLock.Unlock()
 
-    // Store the initialized client
-    client = c
+    // Set the client and database
+	c = client
+    db = client.Database(database)
 
     // Log the initialization
     fmt.Println("Connected to MongoDB")
@@ -45,34 +54,36 @@ func Connect(uri string) error {
     return nil
 }
 
-// GetClient returns the MongoDB client.
-func GetClient() *mongo.Client {
-    // Lock the mutex to safely retrieve the client
-    clientLock.Lock()
-    defer clientLock.Unlock()
-
-    return client
-}
-
-// Close disconnects from MongoDB and closes the client.
-func Close() error {
-    // Lock the mutex to safely close the client
-    clientLock.Lock()
-    defer clientLock.Unlock()
-
+// Disconnect clears the initialized MongoDB client and closes the connection
+func Disconnect() error {
     // Check if the client is already closed
-    if client == nil {
+    if c == nil {
         return nil
     }
 
+	// Lock the mutex to safely clear the client and database
+    dbLock.Lock()
+    defer dbLock.Unlock()
+
     // Disconnect from MongoDB
-    err := client.Disconnect(context.Background())
+    err := c.Disconnect(context.Background())
     if err != nil {
         return err
     }
 
-    fmt.Println("MongoDB connection closed.")
-    client = nil
+	// Clear the client and database
+    c = nil
+	db = nil
 
     return nil
+}
+
+// Get returns a collection in the database
+func GetCollection(collection string) *mongo.Collection {
+	// Lock the mutex to safely get the database
+    dbLock.Lock()
+    defer dbLock.Unlock()
+
+	// Return the database
+	return db.Collection(collection)
 }

@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"website/internal/app"
-	"website/internal/environment"
-	"website/internal/password"
 	"website/internal/server"
 	"website/utils/database"
 	"website/utils/database/models/cards"
@@ -26,29 +24,14 @@ func initAdminCard() {
 }
 
 func main() {
-	// Load configurations
-	if err := environment.Init(`./.env`); err != nil {
-		log.Fatalf("Error loading environment: %v", err)
-	}
-
-	// Load passwords
-	if err := password.Init(`./password.env`); err != nil {
-		log.Fatalf("Error loading password: %v", err)
-	}
-
 	// Initialize the application
     if err := app.Initialize("./"); err != nil {
         log.Fatalf("[Error] %v", err)
     }
 
-	// Initialize MongoDB
-	if err := database.Connect(os.Getenv("MONGO_URI")); err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-
 	// Close database on dereference
 	defer func() {
-		if err := database.Close(); err != nil {
+		if err := database.Disconnect(); err != nil {
 			log.Fatalf("Error closing MongoDB connection: %v", err)
 		}
 	}()
