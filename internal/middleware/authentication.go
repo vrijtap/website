@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"website/utils/jwt"
+	"website/internal/jwt"
 	"fmt"
     "strings"
 	"net/http"

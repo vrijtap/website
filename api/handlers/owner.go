@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"website/internal/password"
-	"website/utils/jwt"
+	"website/internal/jwt"
 	"website/web/templates"
 	
 	"encoding/json"
