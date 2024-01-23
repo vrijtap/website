@@ -6,8 +6,8 @@ import (
 	"website/internal/middleware"
 )
 
-// CreateApiRouter creates a router that routes to API endpoints
-func CreateApiRouter() http.Handler {
+// CreateAPIRouter creates a router that routes to API endpoints
+func CreateAPIRouter() http.Handler {
 	router := mux.NewRouter()
 
 	// Add middleware functionalities
